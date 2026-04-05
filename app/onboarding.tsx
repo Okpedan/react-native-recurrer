@@ -9,7 +9,7 @@ const Onboarding = () => {
                 Welcome to Onboarding!
             </Text>
 
-            <Link href="/" className="border rounded-full p-4 bg-accent">
+            <Link href={"/" as any} className="border rounded-full p-4 bg-accent">
                 <Text className="text-xl font-bold text-white">
                     Go to Home
                 </Text>
