@@ -40,7 +40,7 @@ const TabsLayout = () => {
                 elevation: 0,
             },
             tabBarItemStyle: {
-                paddingVertical: tabBar.height / 2 - tabBar.iconFrame / 1.6,
+                paddingVertical: Math.max(0, tabBar.height / 2 - tabBar.iconFrame / 1.6),
             },
             tabBarIconStyle: {
                 width: tabBar.iconFrame,
