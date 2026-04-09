@@ -1,14 +1,15 @@
 import { useSignIn } from "@clerk/expo";
 import { Link, useRouter } from "expo-router";
 import { styled } from "nativewind";
+import { usePostHog } from "posthog-react-native";
 import React, { useState } from "react";
 import {
-  Image,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
@@ -17,6 +18,7 @@ const SafeAreaView = styled(RNSafeAreaView);
 const SignIn = () => {
   const { signIn } = useSignIn();
   const router = useRouter();
+  const posthog = usePostHog();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +27,7 @@ const SignIn = () => {
 
   const onSignInPress = async () => {
     if (!signIn) return;
+    posthog?.capture("Auth Sign In Clicked");
     setLoading(true);
     setErrorMsg("");
 
@@ -33,12 +36,18 @@ const SignIn = () => {
       await signIn.password({ password });
 
       if (signIn.status === "complete") {
+        posthog?.capture("Auth Sign In Succeeded");
         await signIn.finalize({ navigate: () => router.replace("/(tabs)") });
       } else {
+        posthog?.capture("Auth Sign In Failed", { status: signIn.status });
         console.error("Sign-in failed", { status: signIn.status });
         setErrorMsg("Sign-in failed. Please try again.");
       }
     } catch (err: any) {
+      posthog?.capture("Auth Sign In Failed", {
+        code: err?.errors?.[0]?.code,
+        message: err?.errors?.[0]?.message,
+      });
       console.error("Sign-in error", {
         code: err?.errors?.[0]?.code,
         message: err?.errors?.[0]?.message,

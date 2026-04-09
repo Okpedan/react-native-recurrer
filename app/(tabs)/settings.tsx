@@ -2,6 +2,7 @@ import images from "@/constants/images";
 import { useAuth, useUser } from "@clerk/expo";
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
+import { usePostHog } from "posthog-react-native";
 import React from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
@@ -12,18 +13,26 @@ const Settings = () => {
   const { signOut } = useAuth();
   const { user } = useUser();
   const router = useRouter();
+  const posthog = usePostHog();
 
   const handleSignOut = () => {
+    posthog?.capture("Auth Sign Out Clicked");
     Alert.alert("Sign out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
+      {
+        text: "Cancel",
+        style: "cancel",
+        onPress: () => posthog?.capture("Auth Sign Out Canceled"),
+      },
       {
         text: "Sign out",
         style: "destructive",
         onPress: async () => {
+          posthog?.capture("Auth Sign Out Confirmed");
           try {
             await signOut();
             router.replace("/(auth)/sign-in");
           } catch (error) {
+            posthog?.capture("Auth Sign Out Failed");
             console.error("Sign out failed:", error);
             Alert.alert("Error", "Failed to sign out. Please try again.");
           }
