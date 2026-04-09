@@ -1,10 +1,10 @@
+import images from "@/constants/images";
 import { useAuth, useUser } from "@clerk/expo";
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
 import React from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import images from "@/constants/images";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -14,27 +14,28 @@ const Settings = () => {
   const router = useRouter();
 
   const handleSignOut = () => {
-    Alert.alert(
-      "Sign out",
-      "Are you sure you want to sign out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Sign out",
-          style: "destructive",
-          onPress: async () => {
+    Alert.alert("Sign out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Sign out",
+        style: "destructive",
+        onPress: async () => {
+          try {
             await signOut();
             router.replace("/(auth)/sign-in");
-          },
+          } catch (error) {
+            console.error("Sign out failed:", error);
+            Alert.alert("Error", "Failed to sign out. Please try again.");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const avatarUri = user?.imageUrl;
   const displayName = user?.firstName
     ? `${user.firstName}${user.lastName ? " " + user.lastName : ""}`
-    : user?.username ?? "Account";
+    : (user?.username ?? "Account");
   const email = user?.primaryEmailAddress?.emailAddress ?? "";
 
   return (
@@ -49,9 +50,13 @@ const Settings = () => {
           className="home-avatar"
         />
         <View className="min-w-0 flex-1">
-          <Text className="home-user-name" numberOfLines={1}>{displayName}</Text>
+          <Text className="home-user-name" numberOfLines={1}>
+            {displayName}
+          </Text>
           {email ? (
-            <Text className="auth-helper" numberOfLines={1}>{email}</Text>
+            <Text className="auth-helper" numberOfLines={1}>
+              {email}
+            </Text>
           ) : null}
         </View>
       </View>
@@ -62,7 +67,9 @@ const Settings = () => {
         onPress={handleSignOut}
         activeOpacity={0.7}
       >
-        <Text className="text-base font-sans-bold text-destructive">Sign out</Text>
+        <Text className="text-base font-sans-bold text-destructive">
+          Sign out
+        </Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

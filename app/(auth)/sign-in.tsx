@@ -1,7 +1,7 @@
-import { useSignIn } from '@clerk/expo'
-import { Link, useRouter } from 'expo-router'
-import { styled } from 'nativewind'
-import React, { useState } from 'react'
+import { useSignIn } from "@clerk/expo";
+import { Link, useRouter } from "expo-router";
+import { styled } from "nativewind";
+import React, { useState } from "react";
 import {
   Image,
   ScrollView,
@@ -9,44 +9,47 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native'
-import { SafeAreaView as RNSafeAreaView } from 'react-native-safe-area-context'
+} from "react-native";
+import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
-const SafeAreaView = styled(RNSafeAreaView)
+const SafeAreaView = styled(RNSafeAreaView);
 
 const SignIn = () => {
-  const { signIn } = useSignIn()
-  const router = useRouter()
+  const { signIn } = useSignIn();
+  const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = useState('')
-  const [password, setPassword] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSignInPress = async () => {
-    if (!signIn) return
-    setLoading(true)
-    setErrorMsg('')
+    if (!signIn) return;
+    setLoading(true);
+    setErrorMsg("");
 
     try {
-      await signIn.create({ identifier: emailAddress })
-      await signIn.password({ password })
+      await signIn.create({ identifier: emailAddress });
+      await signIn.password({ password });
 
-      if (signIn.status === 'complete') {
-        await signIn.finalize({ navigate: () => router.replace('/(tabs)') })
+      if (signIn.status === "complete") {
+        await signIn.finalize({ navigate: () => router.replace("/(tabs)") });
       } else {
-        console.error(JSON.stringify(signIn, null, 2))
-        setErrorMsg('Sign-in failed. Please try again.')
+        console.error("Sign-in failed", { status: signIn.status });
+        setErrorMsg("Sign-in failed. Please try again.");
       }
     } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2))
+      console.error("Sign-in error", {
+        code: err?.errors?.[0]?.code,
+        message: err?.errors?.[0]?.message,
+      });
       setErrorMsg(
-        err.errors?.[0]?.message || 'An error occurred during sign in.'
-      )
+        err.errors?.[0]?.message || "An error occurred during sign in.",
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <SafeAreaView className="auth-safe-area">
@@ -55,7 +58,7 @@ const SignIn = () => {
           <View className="auth-brand-block">
             <View className="auth-logo-wrap">
               <Image
-                source={require('@/assets/icons/logo.png')}
+                source={require("@/assets/icons/logo.png")}
                 style={{ width: 64, height: 64 }}
                 resizeMode="contain"
               />
@@ -95,12 +98,12 @@ const SignIn = () => {
               </View>
 
               <TouchableOpacity
-                className={`auth-button ${loading ? 'auth-button-disabled' : ''}`}
+                className={`auth-button ${loading ? "auth-button-disabled" : ""}`}
                 onPress={onSignInPress}
                 disabled={loading}
               >
                 <Text className="auth-button-text">
-                  {loading ? 'Signing in...' : 'Sign in'}
+                  {loading ? "Signing in..." : "Sign in"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -117,8 +120,7 @@ const SignIn = () => {
         </View>
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default SignIn
-
+export default SignIn;

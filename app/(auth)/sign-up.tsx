@@ -32,7 +32,7 @@ const SignUp = () => {
                 await signUp.verifications.sendEmailCode()
             }
         } catch (err: any) {
-            console.error(JSON.stringify(err, null, 2))
+            console.error('SignUp error:', err.errors?.[0]?.code, err.errors?.[0]?.message || err.message)
             setErrorMsg(err.errors?.[0]?.message || 'An error occurred during sign up.')
         } finally {
             setLoading(false)
@@ -52,11 +52,11 @@ const SignUp = () => {
                     navigate: () => router.replace('/(tabs)'),
                 })
             } else {
-                console.error(JSON.stringify(signUp, null, 2))
+                console.error('Verification failed. Status:', signUp.status)
                 setErrorMsg('Verification failed. Please check the code and try again.')
             }
         } catch (err: any) {
-            console.error(JSON.stringify(err, null, 2))
+            console.error('Verification error:', err.errors?.[0]?.code, err.errors?.[0]?.message || err.message)
             setErrorMsg(err.errors?.[0]?.message || 'Invalid verification code.')
         } finally {
             setLoading(false)
