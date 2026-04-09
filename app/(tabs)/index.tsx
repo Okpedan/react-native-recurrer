@@ -2,9 +2,9 @@ import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import {
-    HOME_BALANCE,
-    HOME_SUBSCRIPTIONS,
-    UPCOMING_SUBSCRIPTIONS,
+  HOME_BALANCE,
+  HOME_SUBSCRIPTIONS,
+  UPCOMING_SUBSCRIPTIONS,
 } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
@@ -45,6 +45,9 @@ export default function App() {
               <Pressable
                 onPress={() => posthog?.capture("Home Add Clicked")}
                 hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Add subscription"
+                accessibilityHint="Opens the add subscription flow"
               >
                 <Image source={icons.add} className="home-add-icon" />
               </Pressable>
@@ -104,7 +107,7 @@ export default function App() {
         ItemSeparatorComponent={() => <View className="h-4" />}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text className="home-empty-state">No upcoming renewals yet</Text>
+          <Text className="home-empty-state">No subscriptions yet</Text>
         }
         contentContainerClassName="pb-20"
       />

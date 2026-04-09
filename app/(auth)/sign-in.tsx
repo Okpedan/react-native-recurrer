@@ -4,12 +4,12 @@ import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
 import React, { useState } from "react";
 import {
-    Image,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
@@ -45,8 +45,7 @@ const SignIn = () => {
       }
     } catch (err: any) {
       posthog?.capture("Auth Sign In Failed", {
-        code: err?.errors?.[0]?.code,
-        message: err?.errors?.[0]?.message,
+        code: err?.errors?.[0]?.code ?? "unknown_error",
       });
       console.error("Sign-in error", {
         code: err?.errors?.[0]?.code,

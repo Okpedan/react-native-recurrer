@@ -30,10 +30,10 @@ function PostHogAuthSync() {
 
     if (!isUserLoaded) return;
 
+    const distinctId = user?.id;
+    if (!distinctId) return;
     const email = user?.primaryEmailAddress?.emailAddress;
-    if (!email) return;
-
-    posthog.identify(email, { email });
+    posthog.identify(distinctId, email ? { email } : {});
   }, [
     isAuthLoaded,
     isSignedIn,
@@ -82,16 +82,30 @@ export default function RootLayout() {
     return null;
   }
 
+  const posthogApiKey = process.env.EXPO_PUBLIC_POSTHOG_API_KEY;
+  const posthogHost = process.env.EXPO_PUBLIC_POSTHOG_HOST;
+
+  if (!posthogApiKey || !posthogHost) {
+    console.warn(
+      "PostHog is disabled: missing EXPO_PUBLIC_POSTHOG_API_KEY or EXPO_PUBLIC_POSTHOG_HOST",
+    );
+  }
+
+  const app = (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <PostHogAuthSync />
+      <PostHogScreenTracking />
+      <Stack screenOptions={{ headerShown: false }} />
+    </ClerkProvider>
+  );
+
+  if (!posthogApiKey || !posthogHost) {
+    return app;
+  }
+
   return (
-    <PostHogProvider
-      apiKey={process.env.EXPO_PUBLIC_POSTHOG_API_KEY!}
-      options={{ host: process.env.EXPO_PUBLIC_POSTHOG_HOST }}
-    >
-      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-        <PostHogAuthSync />
-        <PostHogScreenTracking />
-        <Stack screenOptions={{ headerShown: false }} />
-      </ClerkProvider>
+    <PostHogProvider apiKey={posthogApiKey} options={{ host: posthogHost }}>
+      {app}
     </PostHogProvider>
   );
 }

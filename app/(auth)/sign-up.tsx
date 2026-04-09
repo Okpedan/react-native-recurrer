@@ -4,12 +4,12 @@ import { styled } from "nativewind";
 import { usePostHog } from "posthog-react-native";
 import React, { useState } from "react";
 import {
-    Image,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
@@ -44,8 +44,7 @@ const SignUp = () => {
       }
     } catch (err: any) {
       posthog?.capture("Auth Sign Up Failed", {
-        code: err?.errors?.[0]?.code,
-        message: err?.errors?.[0]?.message || err?.message,
+        code: err?.errors?.[0]?.code ?? "unknown_error",
       });
       console.error(
         "SignUp error:",
@@ -85,8 +84,7 @@ const SignUp = () => {
       }
     } catch (err: any) {
       posthog?.capture("Auth Verify Email Code Failed", {
-        code: err?.errors?.[0]?.code,
-        message: err?.errors?.[0]?.message || err?.message,
+        code: err?.errors?.[0]?.code ?? "unknown_error",
       });
       console.error(
         "Verification error:",
