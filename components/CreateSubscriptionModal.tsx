@@ -55,8 +55,10 @@ type Props = {
 };
 
 function toPositiveNumber(value: string) {
-  const normalized = value.replace(",", ".").trim();
-  const parsed = Number(normalized);
+  const normalized = value.trim();
+  // Accept only unambiguous decimal input: 123 or 123.45 or 123,45
+  if (!/^\d+(?:[.,]\d{1,2})?$/.test(normalized)) return null;
+  const parsed = Number(normalized.replace(",", "."));
   if (!Number.isFinite(parsed)) return null;
   if (parsed <= 0) return null;
   return parsed;
@@ -101,8 +103,8 @@ const CreateSubscriptionModal = ({
 
   const parsedPrice = useMemo(() => toPositiveNumber(price), [price]);
 
-  const nameError = attemptedSubmit && name.trim().length === 0;
-  const priceError = attemptedSubmit && parsedPrice === null;
+  const nameError = name.trim().length === 0;
+  const priceError = parsedPrice === null;
 
   const canSubmit = name.trim().length > 0 && parsedPrice !== null;
 
