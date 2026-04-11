@@ -1,7 +1,7 @@
 import { icons } from "@/constants/icons";
 import clsx from "clsx";
 import dayjs from "dayjs";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -29,14 +29,14 @@ const CATEGORIES = [
 type Category = (typeof CATEGORIES)[number];
 
 const CATEGORY_COLORS: Record<Category, string> = {
-  Entertainment: "#f15898",
+  Entertainment: "#f4c2d7",
   "AI Tools": "#b8d4e3",
   "Developer Tools": "#e8def8",
   Design: "#f5c542",
   Productivity: "#c7f3d4",
-  Cloud: "#8accff",
+  Cloud: "#bfe3ff",
   Music: "#d6c7ff",
-  Other: "#9fa7b8",
+  Other: "#e5e7eb",
 };
 
 export type CreateSubscriptionPayload = {
@@ -52,7 +52,6 @@ type Props = {
   onCreate: (subscription: Subscription) => void;
   defaultFrequency?: Frequency;
   defaultCategory?: Category;
-  currency?: string;
 };
 
 function toPositiveNumber(value: string) {
@@ -70,28 +69,7 @@ function makeId(name: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-  const randomSuffix = (() => {
-    try {
-      const cryptoObj = (globalThis as any)?.crypto;
-      if (cryptoObj?.randomUUID) {
-        return String(cryptoObj.randomUUID()).replace(/-/g, "").slice(0, 8);
-      }
-
-      if (cryptoObj?.getRandomValues) {
-        const bytes = new Uint8Array(4);
-        cryptoObj.getRandomValues(bytes);
-        return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(
-          "",
-        );
-      }
-    } catch {
-      // ignore
-    }
-
-    return Math.random().toString(36).slice(2, 10);
-  })();
-
-  return `${base || "subscription"}-${Date.now().toString(36)}-${randomSuffix}`;
+  return `${base || "subscription"}-${Date.now().toString(36)}`;
 }
 
 const CreateSubscriptionModal = ({
@@ -100,7 +78,6 @@ const CreateSubscriptionModal = ({
   onCreate,
   defaultFrequency = "Monthly",
   defaultCategory = "Other",
-  currency,
 }: Props) => {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -108,11 +85,19 @@ const CreateSubscriptionModal = ({
   const [category, setCategory] = useState<Category>(defaultCategory);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
+  const resetForm = useCallback(() => {
+    setName("");
+    setPrice("");
+    setFrequency(defaultFrequency);
+    setCategory(defaultCategory);
+    setAttemptedSubmit(false);
+  }, [defaultFrequency, defaultCategory]);
+
   useEffect(() => {
     if (!visible) {
-      setAttemptedSubmit(false);
+      resetForm();
     }
-  }, [visible]);
+  }, [visible, resetForm]);
 
   const parsedPrice = useMemo(() => toPositiveNumber(price), [price]);
 
@@ -120,14 +105,6 @@ const CreateSubscriptionModal = ({
   const priceError = attemptedSubmit && parsedPrice === null;
 
   const canSubmit = name.trim().length > 0 && parsedPrice !== null;
-
-  const resetForm = () => {
-    setName("");
-    setPrice("");
-    setFrequency(defaultFrequency);
-    setCategory(defaultCategory);
-    setAttemptedSubmit(false);
-  };
 
   const handleClose = () => {
     resetForm();
@@ -153,7 +130,7 @@ const CreateSubscriptionModal = ({
       icon: icons.plus,
       billing: frequency,
       color: CATEGORY_COLORS[category],
-      currency: currency ?? "USD",
+      currency: "USD",
     };
 
     onCreate(newSubscription);
