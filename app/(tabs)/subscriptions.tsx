@@ -67,7 +67,7 @@ const Subscriptions = () => {
       {/* Search Bar */}
       <View className="subs-search-row">
         <Image
-          source={icons.menu} // Using menu as a generic icon, typically would use search
+          source={icons.search} // Using menu as a generic icon, typically would use search
           className="subs-search-icon"
           resizeMode="contain"
         />

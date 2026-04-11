@@ -112,6 +112,6 @@ export const subscriptionsStore = {
     this.subscriptions = [subscription, ...this.subscriptions];
   },
   getAll() {
-    return this.subscriptions;
+    return [...this.subscriptions];
   },
 };

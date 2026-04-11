@@ -35,6 +35,14 @@ export default function App() {
   const avatarUri = user?.imageUrl;
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
+      <CreateSubscriptionModal
+        visible={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreate={(subscription) => {
+          subscriptionsStore.add(subscription);
+          setSubscriptions(subscriptionsStore.getAll());
+        }}
+      />
       <FlatList
         ListHeaderComponent={() => (
           <>
@@ -60,15 +68,6 @@ export default function App() {
                 <Image source={icons.add} className="home-add-icon" />
               </Pressable>
             </View>
-
-            <CreateSubscriptionModal
-              visible={createModalOpen}
-              onClose={() => setCreateModalOpen(false)}
-              onCreate={(subscription) => {
-                subscriptionsStore.add(subscription);
-                setSubscriptions(subscriptionsStore.getAll());
-              }}
-            />
 
             <View className="home-balance-card">
               <Text className="home-balance-label">Balance</Text>
