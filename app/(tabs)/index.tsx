@@ -1,10 +1,11 @@
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import {
-  HOME_BALANCE,
-  HOME_SUBSCRIPTIONS,
-  UPCOMING_SUBSCRIPTIONS,
+    HOME_BALANCE,
+    subscriptionsStore,
+    UPCOMING_SUBSCRIPTIONS,
 } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
@@ -22,6 +23,10 @@ const SafeAreaView = styled(RNSafeAreaView);
 export default function App() {
   const { user } = useUser();
   const posthog = usePostHog();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>(
+    subscriptionsStore.getAll(),
+  );
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
     string | null
   >(null);
@@ -43,7 +48,10 @@ export default function App() {
               </View>
 
               <Pressable
-                onPress={() => posthog?.capture("Home Add Clicked")}
+                onPress={() => {
+                  posthog?.capture("Home Add Clicked");
+                  setCreateModalOpen(true);
+                }}
                 hitSlop={10}
                 accessibilityRole="button"
                 accessibilityLabel="Add subscription"
@@ -52,6 +60,15 @@ export default function App() {
                 <Image source={icons.add} className="home-add-icon" />
               </Pressable>
             </View>
+
+            <CreateSubscriptionModal
+              visible={createModalOpen}
+              onClose={() => setCreateModalOpen(false)}
+              onCreate={(subscription) => {
+                subscriptionsStore.add(subscription);
+                setSubscriptions(subscriptionsStore.getAll());
+              }}
+            />
 
             <View className="home-balance-card">
               <Text className="home-balance-label">Balance</Text>
@@ -86,7 +103,7 @@ export default function App() {
             <ListHeading title="All Subscriptions" />
           </>
         )}
-        data={HOME_SUBSCRIPTIONS}
+        data={subscriptions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <SubscriptionCard
