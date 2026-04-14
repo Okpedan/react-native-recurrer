@@ -1,6 +1,7 @@
 import { icons } from "@/constants/icons";
 import clsx from "clsx";
 import dayjs from "dayjs";
+import { usePostHog } from "posthog-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -81,6 +82,8 @@ const CreateSubscriptionModal = ({
   defaultFrequency = "Monthly",
   defaultCategory = "Other",
 }: Props) => {
+  const posthog = usePostHog();
+
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [frequency, setFrequency] = useState<Frequency>(defaultFrequency);
@@ -96,10 +99,12 @@ const CreateSubscriptionModal = ({
   }, [defaultFrequency, defaultCategory]);
 
   useEffect(() => {
-    if (!visible) {
+    if (visible) {
+      posthog?.capture("Subscription Modal Opened");
+    } else {
       resetForm();
     }
-  }, [visible, resetForm]);
+  }, [visible, resetForm, posthog]);
 
   const parsedPrice = useMemo(() => toPositiveNumber(price), [price]);
 
@@ -109,13 +114,23 @@ const CreateSubscriptionModal = ({
   const canSubmit = name.trim().length > 0 && parsedPrice !== null;
 
   const handleClose = () => {
+    posthog?.capture("Subscription Modal Closed");
     resetForm();
     onClose();
   };
 
   const handleSubmit = () => {
+    posthog?.capture("Subscription Create Clicked");
     setAttemptedSubmit(true);
-    if (!canSubmit || parsedPrice === null) return;
+
+    if (!canSubmit || parsedPrice === null) {
+      posthog?.capture("Subscription Create Failed", {
+        reason: "validation_error",
+        name_empty: name.trim().length === 0,
+        price_invalid: parsedPrice === null,
+      });
+      return;
+    }
 
     const start = dayjs();
     const renewal =
@@ -134,6 +149,13 @@ const CreateSubscriptionModal = ({
       color: CATEGORY_COLORS[category],
       currency: "USD",
     };
+
+    posthog?.capture("Subscription Created", {
+      name: newSubscription.name,
+      price: newSubscription.price,
+      frequency,
+      category,
+    });
 
     onCreate(newSubscription);
     resetForm();
@@ -214,7 +236,12 @@ const CreateSubscriptionModal = ({
                     return (
                       <Pressable
                         key={option}
-                        onPress={() => setFrequency(option)}
+                        onPress={() => {
+                          setFrequency(option);
+                          posthog?.capture("Subscription Frequency Changed", {
+                            frequency: option,
+                          });
+                        }}
                         className={clsx(
                           "picker-option",
                           active && "picker-option-active",
@@ -242,7 +269,12 @@ const CreateSubscriptionModal = ({
                     return (
                       <Pressable
                         key={option}
-                        onPress={() => setCategory(option)}
+                        onPress={() => {
+                          setCategory(option);
+                          posthog?.capture("Subscription Category Changed", {
+                            category: option,
+                          });
+                        }}
                         className={clsx(
                           "category-chip",
                           active && "category-chip-active",
