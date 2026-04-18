@@ -56,19 +56,8 @@
       ],
       "expo-secure-store",
       "expo-localization",
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "packagingOptions": {
-              "pickFirst": [
-                "**/MANIFEST.MF",
-                "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
-              ]
-            }
-          }
-        }
-      ]
+      "expo-build-properties",
+      "./plugins/withAndroidPackaging"
     ],
     "experiments": {
       "typedRoutes": true,
